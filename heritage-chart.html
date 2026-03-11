@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Family Heritage</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Nunito:wght@400;600;700&display=swap');
+
+  :root {
+    --cream: #fdf6ec;
+    --warm: #f5ede0;
+    --brown: #6b4c35;
+    --accent: #c0714a;
+    --green: #5a7a5e;
+    --gold: #d4a853;
+    --text: #3a2e26;
+    --border: #ddd0c2;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--cream);
+    background-image: radial-gradient(circle at 20% 20%, #f0e6d3 0%, transparent 50%),
+                      radial-gradient(circle at 80% 80%, #e8ddd0 0%, transparent 50%);
+    min-height: 100vh;
+    color: var(--text);
+    padding: 20px;
+  }
+
+  header {
+    text-align: center;
+    padding: 30px 20px 20px;
+  }
+
+  header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    color: var(--brown);
+    line-height: 1.1;
+  }
+
+  header p {
+    margin-top: 8px;
+    color: var(--accent);
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    align-items: start;
+  }
+
+  @media (max-width: 700px) {
+    .container { grid-template-columns: 1fr; }
+  }
+
+  .card {
+    background: white;
+    border-radius: 20px;
+    padding: 28px;
+    box-shadow: 0 4px 24px rgba(107,76,53,0.08);
+    border: 1.5px solid var(--border);
+  }
+
+  .card h2 {
+    font-family: 'Playfair Display', serif;
+    color: var(--brown);
+    font-size: 1.4rem;
+    margin-bottom: 18px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--warm);
+  }
+
+  #name-section {
+    margin-bottom: 18px;
+  }
+
+  #name-section label {
+    font-weight: 700;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--brown);
+    display: block;
+    margin-bottom: 5px;
+  }
+
+  #family-name {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 1rem;
+    background: var(--cream);
+    color: var(--text);
+    transition: border-color 0.2s;
+  }
+
+  #family-name:focus { outline: none; border-color: var(--accent); }
+
+  #entries {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .entry-row {
+    display: grid;
+    grid-template-columns: 1fr 90px 36px;
+    gap: 8px;
+    align-items: center;
+    animation: slideIn 0.25s ease;
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .entry-row input {
+    padding: 9px 12px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.95rem;
+    background: var(--cream);
+    color: var(--text);
+    transition: border-color 0.2s;
+  }
+
+  .entry-row input:focus { outline: none; border-color: var(--accent); }
+
+  .entry-row input[type="number"] {
+    text-align: center;
+  }
+
+  .remove-btn {
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: #fce8e0;
+    color: var(--accent);
+    border-radius: 8px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: background 0.2s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .remove-btn:hover { background: #f8d0c2; }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 18px;
+    border: none;
+    border-radius: 10px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  #add-btn {
+    background: var(--warm);
+    color: var(--brown);
+    border: 1.5px solid var(--border);
+  }
+  #add-btn:hover { background: var(--border); }
+
+  .total-bar {
+    margin: 14px 0;
+    font-size: 0.9rem;
+    font-weight: 700;
+    padding: 10px 14px;
+    border-radius: 10px;
+    background: var(--warm);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .total-bar .total-num {
+    font-size: 1.1rem;
+    color: var(--accent);
+  }
+
+  .total-bar.over .total-num { color: #c0392b; }
+  .total-bar.exact .total-num { color: var(--green); }
+
+  #chart-title {
+    font-family: 'Playfair Display', serif;
+    color: var(--brown);
+    text-align: center;
+    font-size: 1.3rem;
+    margin-bottom: 16px;
+  }
+
+  #chart-wrap {
+    position: relative;
+    max-width: 320px;
+    margin: 0 auto;
+  }
+
+  #empty-msg {
+    text-align: center;
+    color: #bbb;
+    font-size: 0.95rem;
+    padding: 50px 0;
+  }
+
+  .legend {
+    margin-top: 18px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    background: var(--warm);
+    padding: 5px 10px;
+    border-radius: 20px;
+  }
+
+  .legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .col-labels {
+    display: grid;
+    grid-template-columns: 1fr 90px 36px;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+
+  .col-labels span {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #999;
+    padding-left: 4px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🌍 My Family Heritage</h1>
+  <p>Enter your ethnicities &amp; see your unique mix</p>
+</header>
+
+<div class="container">
+  <!-- Input Card -->
+  <div class="card">
+    <h2>Enter Your Heritage</h2>
+
+    <div id="name-section">
+      <label for="family-name">Family Name (optional)</label>
+      <input type="text" id="family-name" placeholder="e.g. The Tanaka-Garcia Family" oninput="updateChart()">
+    </div>
+
+    <div class="col-labels">
+      <span>Ethnicity / Origin</span>
+      <span style="text-align:center">%</span>
+      <span></span>
+    </div>
+
+    <div id="entries"></div>
+
+    <button class="btn" id="add-btn" onclick="addRow()">＋ Add Another</button>
+
+    <div class="total-bar" id="total-bar">
+      <span>Total</span>
+      <span class="total-num" id="total-display">0%</span>
+    </div>
+
+    <p style="font-size:0.8rem; color:#aaa; margin-top:4px;">Percentages should add up to 100%</p>
+  </div>
+
+  <!-- Chart Card -->
+  <div class="card">
+    <h2>Your Heritage Chart</h2>
+    <div id="chart-title"></div>
+    <div id="chart-wrap">
+      <canvas id="myChart"></canvas>
+      <div id="empty-msg">Add your ethnicities on the left to see your chart! 🎨</div>
+    </div>
+    <div class="legend" id="legend"></div>
+  </div>
+</div>
+
+<script>
+  const PALETTE = [
+    '#c0714a','#5a7a5e','#d4a853','#7b9cc9','#b87bb5',
+    '#6bbfb5','#e08b6a','#7a9e5c','#c9885a','#8899cc',
+    '#d4a0c0','#70b890','#e0b060','#9070c0','#60a8c0'
+  ];
+
+  let chartInstance = null;
+  let rowCount = 0;
+
+  function addRow(ethnicity = '', pct = '') {
+    rowCount++;
+    const id = 'row-' + rowCount;
+    const div = document.createElement('div');
+    div.className = 'entry-row';
+    div.id = id;
+    div.innerHTML = `
+      <input type="text" placeholder="e.g. Japanese" value="${ethnicity}" oninput="updateChart()" />
+      <input type="number" placeholder="%" min="0" max="100" value="${pct}" oninput="updateChart()" />
+      <button class="remove-btn" onclick="removeRow('${id}')" title="Remove">✕</button>
+    `;
+    document.getElementById('entries').appendChild(div);
+    updateChart();
+  }
+
+  function removeRow(id) {
+    const el = document.getElementById(id);
+    if (el) el.remove();
+    updateChart();
+  }
+
+  function getData() {
+    const rows = document.querySelectorAll('.entry-row');
+    const labels = [], values = [], colors = [];
+    let i = 0;
+    rows.forEach(row => {
+      const inputs = row.querySelectorAll('input');
+      const label = inputs[0].value.trim();
+      const val = parseFloat(inputs[1].value);
+      if (label && !isNaN(val) && val > 0) {
+        labels.push(label);
+        values.push(val);
+        colors.push(PALETTE[i % PALETTE.length]);
+        i++;
+      }
+    });
+    return { labels, values, colors };
+  }
+
+  function updateChart() {
+    const { labels, values, colors } = getData();
+    const total = values.reduce((a, b) => a + b, 0);
+
+    const totalEl = document.getElementById('total-display');
+    const bar = document.getElementById('total-bar');
+    totalEl.textContent = Math.round(total * 10) / 10 + '%';
+    bar.className = 'total-bar' + (total > 100 ? ' over' : total === 100 ? ' exact' : '');
+
+    const name = document.getElementById('family-name').value.trim();
+    document.getElementById('chart-title').textContent = name ? name : '';
+
+    const emptyMsg = document.getElementById('empty-msg');
+    const canvas = document.getElementById('myChart');
+
+    if (labels.length === 0) {
+      emptyMsg.style.display = 'block';
+      canvas.style.display = 'none';
+      document.getElementById('legend').innerHTML = '';
+      if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
+      return;
+    }
+
+    emptyMsg.style.display = 'none';
+    canvas.style.display = 'block';
+
+    if (chartInstance) chartInstance.destroy();
+
+    chartInstance = new Chart(canvas, {
+      type: 'pie',
+      data: {
+        labels,
+        datasets: [{
+          data: values,
+          backgroundColor: colors,
+          borderColor: '#fff',
+          borderWidth: 3,
+          hoverOffset: 12
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: ctx => ` ${ctx.label}: ${ctx.parsed}%`
+            },
+            bodyFont: { family: 'Nunito', size: 14 },
+            padding: 10
+          }
+        }
+      }
+    });
+
+    const legendEl = document.getElementById('legend');
+    legendEl.innerHTML = labels.map((l, i) => `
+      <div class="legend-item">
+        <div class="legend-dot" style="background:${colors[i]}"></div>
+        <span>${l} — ${values[i]}%</span>
+      </div>
+    `).join('');
+  }
+
+  // Start with 3 rows
+  addRow('', '');
+  addRow('', '');
+  addRow('', '');
+</script>
+</body>
+</html>
